@@ -71,7 +71,7 @@ impl Bitmask {
 pub fn encode(src: impl AsRef<[u8]>, mask: Bitmask) -> String {
     let src = src.as_ref();
     let mut out = String::with_capacity(src.len());
-    for ch in src.iter().copied() {
+    for &ch in src.iter() {
         if ch == b' ' {
             out.push('+');
         } else if mask.contains(ch) {
@@ -112,6 +112,21 @@ pub fn decode(src: impl AsRef<[u8]>) -> Vec<u8> {
         }
     }
     out
+}
+
+/// Checks if this string contains any unencoded characters
+/// # Example
+/// ```
+/// # use percent_encoding_lite::{is_encoded, Bitmask};
+/// let string = "Dovahkiin, Dovahkiin, naal ok zin los vahriin, wah dein vokul mahfaeraak ahst vaal!";
+/// // contains comma = false
+/// assert!(!is_encoded(&string, Bitmask::URI_COMPONENT));
+/// ```
+pub fn is_encoded(src: impl AsRef<[u8]>, mask: Bitmask) -> bool {
+    for &ch in src.as_ref() {
+        if mask.contains(ch) { return false; }
+    }
+    true
 }
 
 #[cfg(test)]
