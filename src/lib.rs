@@ -56,7 +56,7 @@ impl Bitmask {
         .add_all(b"0123456789")
         .add_all(b"-_.!~*'()");
     pub const URI: Bitmask = Bitmask::URI_COMPONENT.add_all(b";/?:@&=+$,#");
-    pub const RFC3986: Bitmask = Bitmask::URI.add_all(b"[]").remove_all(b"*'()");
+    pub const RFC3986: Bitmask = Bitmask::URI.add_all(b"[]").remove_all(b"!'()*");
     pub const PATH: Bitmask = Bitmask::URI_COMPONENT.remove(b'/');
 }
 
