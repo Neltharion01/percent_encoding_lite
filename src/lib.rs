@@ -93,24 +93,22 @@ pub fn encode(src: impl AsRef<[u8]>, mask: Bitmask) -> String {
 /// let decoded = percent_encoding_lite::decode(encoded);
 /// assert_eq!(&decoded, b"To keep evil forever at bay!");
 /// ```
-pub fn decode(src: &str) -> Vec<u8> {
-    let mut slice = src.as_bytes();
+pub fn decode(src: impl AsRef<[u8]>) -> Vec<u8> {
+    let mut iter = src.as_ref().iter();
     let mut out = vec![];
-    while let Some(&i) = slice.first() {
-        slice = &slice[1..]; // I wish rust had random access iterators
-
+    while let Some(&i) = iter.next() {
         if i == b'+' {
             out.push(b' ');
         } else if i != b'%' {
             out.push(i);
         } else {
-            if slice.len() < 2 { out.push(i); slice = &slice[1..]; continue; }
-            let (hi, lo) = (slice[0], slice[1]);
+            if iter.len() < 2 { out.push(i); iter.next(); continue; }
+            let (hi, lo) = (iter.as_slice()[0], iter.as_slice()[1]);
             let digits = char::from(hi).to_digit(16).zip(char::from(lo).to_digit(16));
-            if digits.is_none() { out.push(i); slice = &slice[1..]; continue; }
+            if digits.is_none() { out.push(i); iter.next(); continue; }
             let (hi, lo) = digits.unwrap();
             out.push((hi * 16 + lo) as u8);
-            slice = &slice[2..];
+            iter.next(); iter.next();
         }
     }
     out
