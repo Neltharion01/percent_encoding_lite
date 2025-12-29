@@ -60,16 +60,16 @@ impl Bitmask {
     pub const PATH: Bitmask = Bitmask::URI_COMPONENT.remove(b'/');
 }
 
-const HEX: &[u8] = b"0123456789ABCDEF";
 /// Encodes given slice using provided [`Bitmask`]
 /// # Example
 /// ```
 /// # use percent_encoding_lite::Bitmask;
 /// let string = "Dragonborn, dragonborn, by his honor is sworn";
-/// let encoded = percent_encoding_lite::encode(string.as_bytes(), Bitmask::URI);
+/// let encoded = percent_encoding_lite::encode(string, Bitmask::URI);
 /// assert_eq!(&encoded, "Dragonborn,+dragonborn,+by+his+honor+is+sworn");
 /// ```
-pub fn encode(src: &[u8], mask: Bitmask) -> String {
+pub fn encode(src: impl AsRef<[u8]>, mask: Bitmask) -> String {
+    let src = src.as_ref();
     let mut out = String::with_capacity(src.len());
     for ch in src.iter().copied() {
         if ch == b' ' {
@@ -77,6 +77,7 @@ pub fn encode(src: &[u8], mask: Bitmask) -> String {
         } else if mask.contains(ch) {
             out.push(ch as char);
         } else {
+            const HEX: &[u8] = b"0123456789ABCDEF";
             out.push('%');
             out.push(HEX[ch as usize >> 4] as char);
             out.push(HEX[ch as usize & 0xF] as char);
@@ -133,12 +134,12 @@ mod test {
     #[test]
     fn urlencode_test() {
         let orig = "Microsoft Windows 10, version 22H2, build 19045.2846 (updated April 2023) - Оригинальные образы от Microsoft MSDN [Ru]";
-        let encoded = encode(orig.as_bytes(), Bitmask::URI_COMPONENT);
+        let encoded = encode(orig, Bitmask::URI_COMPONENT);
         let correct = "Microsoft+Windows+10%2C+version+22H2%2C+build+19045.2846+(updated+April+2023)+-+%D0%9E%D1%80%D0%B8%D0%B3%D0%B8%D0%BD%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B5+%D0%BE%D0%B1%D1%80%D0%B0%D0%B7%D1%8B+%D0%BE%D1%82+Microsoft+MSDN+%5BRu%5D";
         assert_eq!(&encoded, correct);
 
         let orig = "Windows_Embedded_8.1_Industry_Pro_with_Update_x86_x64_MultiLang";
-        let encoded = encode(orig.as_bytes(), Bitmask::URI_COMPONENT);
+        let encoded = encode(orig, Bitmask::URI_COMPONENT);
         assert_eq!(&encoded, orig);
     }
 }
