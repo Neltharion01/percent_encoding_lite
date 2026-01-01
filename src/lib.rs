@@ -57,7 +57,7 @@ impl Bitmask {
         .add_all(b"-_.!~*'()");
     pub const URI: Bitmask = Bitmask::URI_COMPONENT.add_all(b";/?:@&=+$,#");
     pub const RFC3986: Bitmask = Bitmask::URI.add_all(b"[]").remove_all(b"!'()*");
-    pub const PATH: Bitmask = Bitmask::URI_COMPONENT.remove(b'/');
+    pub const PATH: Bitmask = Bitmask::URI_COMPONENT.add(b'/');
 }
 
 /// Encodes given slice using provided [`Bitmask`]
