@@ -123,8 +123,9 @@ pub fn decode(src: impl AsRef<[u8]>) -> Vec<u8> {
 /// assert!(!is_encoded(&string, Bitmask::URI_COMPONENT));
 /// ```
 pub fn is_encoded(src: impl AsRef<[u8]>, mask: Bitmask) -> bool {
+    let mask = mask.add(b'%');
     for &ch in src.as_ref() {
-        if mask.contains(ch) { return false; }
+        if !mask.contains(ch) { return false; }
     }
     true
 }
@@ -154,5 +155,18 @@ mod test {
         let orig = "Windows_Embedded_8.1_Industry_Pro_with_Update_x86_x64_MultiLang";
         let encoded = encode(orig, Bitmask::URI_COMPONENT);
         assert_eq!(&encoded, orig);
+    }
+    #[test]
+    fn is_encoded_test() {
+        // Dot not allowed in URI_COMPONENT - not encoded
+        assert!(!is_encoded(",", Bitmask::URI_COMPONENT));
+        // Regular text - allowed
+        assert!(is_encoded("abc", Bitmask::URI_COMPONENT));
+        // Square bracket not in URI - not encoded
+        assert!(!is_encoded("abc[def", Bitmask::URI));
+        // Comma in URI - allowed
+        assert!(is_encoded("abc,def", Bitmask::URI));
+        // Percent sign means it is encoded
+        assert!(is_encoded("%01%02", Bitmask::URI));
     }
 }
