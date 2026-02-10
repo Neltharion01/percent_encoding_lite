@@ -115,12 +115,14 @@ pub fn decode(src: impl AsRef<[u8]>) -> Vec<u8> {
 }
 
 /// Checks if this string contains any unencoded characters
+///
+/// You can use this function to avoid double-encoding (when data has to be encoded, but may be encoded already)
 /// # Example
 /// ```
 /// # use percent_encoding_lite::{is_encoded, Bitmask};
 /// let string = "Dovahkiin, Dovahkiin, naal ok zin los vahriin, wah dein vokul mahfaeraak ahst vaal!";
-/// // contains comma = false
-/// assert!(!is_encoded(&string, Bitmask::URI_COMPONENT));
+/// // Bitmask::URI_COMPONENT does not list ',' as allowed, so this string should be encoded
+/// assert!(is_encoded(&string, Bitmask::URI_COMPONENT) == false);
 /// ```
 pub fn is_encoded(src: impl AsRef<[u8]>, mask: Bitmask) -> bool {
     let mask = mask.add(b'%');
@@ -158,15 +160,15 @@ mod test {
     }
     #[test]
     fn is_encoded_test() {
-        // Dot not allowed in URI_COMPONENT - not encoded
-        assert!(!is_encoded(",", Bitmask::URI_COMPONENT));
-        // Regular text - allowed
-        assert!(is_encoded("abc", Bitmask::URI_COMPONENT));
-        // Square bracket not in URI - not encoded
-        assert!(!is_encoded("abc[def", Bitmask::URI));
-        // Comma in URI - allowed
-        assert!(is_encoded("abc,def", Bitmask::URI));
-        // Percent sign means it is encoded
-        assert!(is_encoded("%01%02", Bitmask::URI));
+        // No comma in Bitmask::URI_COMPONENT
+        assert!(is_encoded(",", Bitmask::URI_COMPONENT) == false);
+        // Regular text
+        assert!(is_encoded("abc", Bitmask::URI_COMPONENT) == true);
+        // No '[' in Bitmask::URI
+        assert!(is_encoded("abc[def", Bitmask::URI) == false);
+        // Bitmask::URI has comma, while Bitmask::URI_COMPONENT doesn't
+        assert!(is_encoded("abc,def", Bitmask::URI) == true);
+        // While not allowed, percent sign does not mean that string should be encoded
+        assert!(is_encoded("%01%02", Bitmask::URI) == true);
     }
 }
