@@ -125,7 +125,7 @@ pub fn decode(src: impl AsRef<[u8]>) -> Vec<u8> {
 /// assert!(is_encoded(&string, Bitmask::URI_COMPONENT) == false);
 /// ```
 pub fn is_encoded(src: impl AsRef<[u8]>, mask: Bitmask) -> bool {
-    let mask = mask.add(b'%');
+    let mask = mask.add(b'%').add(b'+');
     for &ch in src.as_ref() {
         if !mask.contains(ch) { return false; }
     }
