@@ -146,7 +146,7 @@ pub fn decode_form(src: impl AsRef<[u8]>) -> Vec<u8> {
 
 /// Checks if this string contains any unencoded characters
 ///
-/// You can use this function to optimize your code, to avoid allocation if data does not need to he encoded (since this library's function don't return `Cow`)
+/// You can use this function to optimize your code, to avoid allocation if data does not need to he encoded (since this library's functions don't return `Cow`)
 /// # Example
 /// ```
 /// # use percent_encoding_lite::{is_encoded, Bitmask};
